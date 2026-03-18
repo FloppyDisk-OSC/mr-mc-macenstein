@@ -26,13 +26,20 @@ module.exports = {
                     for (const command of commands) {
                         let category = imports.locateCategory(dbs.commands[command].category, embed.fields)
                         if (!category) continue
-                        let name = embed.fields[category].value
-                        embed.fields[category].value = name + '\n`' + command + '` ' + dbs.commands[command].description
+                        embed.fields[category].value += '\n`' + command + '` ' + dbs.commands[command].description
                     }
                 } else if (commands.includes(args)) {
                     const commandData = dbs.commands[args].command
                     embed.title = commandData.name
-                    embed.description = commandData.lDesc
+                    embed.description = commandData.lDesc;
+                    embed.fields = [];
+                    for (const arg of commandData.args) {
+                        embed.fields.push({
+                            name: `${arg.name} (${arg.type})`,
+                            value: arg.desc,
+                            inline: true
+                        });
+                    }
                 } else {
                     embed.title = 'non-existant command'
                     embed.description = 'the command you provided doesnt exist'
@@ -52,6 +59,7 @@ module.exports = {
                 commandData.execute(message)
             } catch (err) {
                 message.channel.send('command failed :(')
+                console.warn(err);
                 imports.client.channels.cache.get(dbs.config.channels.console).send(err.stack)
             }
         }

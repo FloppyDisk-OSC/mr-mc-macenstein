@@ -7,6 +7,11 @@ module.exports = async (message, args, slash) => {
         return result
     }
     
+    if (args.length <= 0) return result;
+    if (args.length === 1 && args[0].type === 'string') {
+        result[args[0].name] = message.args;
+        return result;
+    }
     const messageSplit = message.args.split(' ')
     let isInString = 0
     for (let argIndex = 0; argIndex < args.length; argIndex++) {
@@ -28,12 +33,12 @@ module.exports = async (message, args, slash) => {
             if (argContent.startsWith(left) && !isInString) isInString = argIndex
             if (argContent.endsWith(right)) {
                 result[name] = messageSplit.slice(isInString, argIndex+1).join(' ')
-                message.args.splice(isInString, argIndex - isInString)
-                argIndex = isInString + 1
+                messageSplit.splice(isInString, argIndex - isInString)
+                argIndex = isInString
                 isInString = 0
             }
             if (!valid) {
-                return `The argument "${name}" has to be wraped in ${left}${right} and its contents must contain no whitspace charecters exept for space`
+                return `The argument "${name}" has to be wraped in ${left}${right} and must have whitespace before and after`
             }
             break;
         case 'number':

@@ -34,22 +34,22 @@ class DatabaseManager {
     /** @type {{ [key: string]: Database }} */
     static databases = {};
     static user(id) {
-        const dir = path.resolve('./databases/user', id + '.json');
+        const dir = path.resolve(__dirname, '../databases/user', id + '.json');
         if (!(dir in this.databases)) this.databases[dir] = new Database(dir);
         return this.databases[dir];
     }
     static channel(id) {
-        const dir = path.resolve('./databases/channel', id + '.json');
+        const dir = path.resolve(__dirname, '../databases/channel', id + '.json');
         if (!(dir in this.databases)) this.databases[dir] = new Database(dir);
         return this.databases[dir];
     }
     static server(id) {
-        const dir = path.resolve('./databases/server', id + '.json');
+        const dir = path.resolve(__dirname, '../databases/server', id + '.json');
         if (!(dir in this.databases)) this.databases[dir] = new Database(dir);
         return this.databases[dir];
     }
     static global() {
-        const dir = path.resolve('./databases/global.json');
+        const dir = path.resolve(__dirname, '../databases/global.json');
         if (!(dir in this.databases)) this.databases[dir] = new Database(dir);
         return this.databases[dir];
     }

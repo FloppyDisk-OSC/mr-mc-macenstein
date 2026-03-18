@@ -1,6 +1,6 @@
 module.exports = {
     name: 'disable-santa',
-    category: 'dumb fun',
+    category: 'operator',
     sDesc: 'enables santa clause',
     lDesc: 'enables santa clause, can only be used by <@860531746294726736>',
     args: [],

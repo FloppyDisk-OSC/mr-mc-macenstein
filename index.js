@@ -51,11 +51,11 @@ globalThis.dbs = { // databases
 let slashCommands = []
 
 console.log('\n')
-const commandsPath = path.resolve(__dirname, 'events');
+const commandsPath = path.resolve(__dirname, 'commands');
 fs.readdir(commandsPath, async (err, files) => { // read commands folder into a list of commands
     console.log(err ? err : 'reading commands with no error')
     files.forEach(async file => {
-        const filePath = path.resolve(eventsPath, file);
+        const filePath = path.resolve(commandsPath, file);
         const command = require(filePath)
         if (command.slashCmd) {
             console.log(`pushed ${command.comData.name} to slash command sync list`)
