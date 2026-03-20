@@ -111,7 +111,7 @@ fs.watch('./commands', (type, filename) => {
                 description: command.comData.description,
                 command,
                 isSlash: command.slashCmd,
-                file: filePath
+                file
             }
             return
         }
@@ -120,7 +120,7 @@ fs.watch('./commands', (type, filename) => {
             description: command.sDesc,
             category: command.category,
             command,
-            file: filePath
+            file
         }
     }
 });
