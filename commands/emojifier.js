@@ -102,20 +102,14 @@ function hsvToRgb (hsv) {
     images = await Promise.all(Object.values(urls).map(url => loadImage(url)));
     width = 32;
     height = width;
-    const canvas = createCanvas(width,height);
+    const canvas = createCanvas(1,1);
     const ctx = canvas.getContext('2d');
     console.log('Extracting emoji pixels...');
     for (const idx in images) {
         ctx.clearRect(0,0,width,height);
-        ctx.drawImage(images[idx], 0,0, width,height);
+        ctx.drawImage(images[idx], 0,0, canvas.width,canvas.height);
         const data = ctx.getImageData(0,0, width,height).data;
-        let count = 0;
-        const rgbColors = data.reduce((c,v,i) => (c[i % 4] += v, (i % 4) === 3 && (count += v / 255), c), [0,0,0,0]);
-        rgbColors[0] /= count;
-        rgbColors[1] /= count;
-        rgbColors[2] /= count;
-        rgbColors[3] /= data.length / 4;
-        const colors = rgbToHsv(rgbColors);
+        const colors = rgbToHsv(data);
         pixels.push([emojis[idx], colors]);
         images[idx] = [emojis[idx], images[idx]];
     }
@@ -131,23 +125,22 @@ async function startDraw(message, file) {
         image = await sharp(image).png().toBuffer();
     const toTransform = await loadImage(image).catch(() => {});
     if (!toTransform) return rootMsg.edit('The image is in an unsupported format (supports png,jpeg,svg,webp,gif,avif,pdf ONLY)');
-    let tilesWide = Math.max(Math.round(toTransform.width / width), 24);
-    let tilesHigh = Math.max(Math.round(toTransform.height / height), 24);
-    const canvas = createCanvas(tilesWide * width, tilesHigh * height);
+    let tilesWide = Math.round(toTransform.width / width);
+    let tilesHigh = Math.round(toTransform.height / height);
+    const scale = Math.min(24 / tilesWide, 24 / tilesHigh) * (message.arguments.scale || 1);
+    tilesWide *= scale;
+    tilesHigh *= scale;
+    tilesWide = Math.round(tilesWide);
+    tilesHigh = Math.round(tilesHigh);
+    const canvas = createCanvas(tilesWide, tilesHigh);
     const ctx = canvas.getContext('2d');
     await rootMsg.edit('Extracting image squares...');
     ctx.drawImage(toTransform, 0,0, canvas.width, canvas.height);
     const segments = [];
-    for (let y = 0; y < canvas.height; y += width)
-        for (let x = 0; x < canvas.width; x += height) {
-            const data = ctx.getImageData(x,y, width, height).data;
-            let count = 0;
-            const rgbColors = data.reduce((c,v,i) => (c[i % 4] += v, (i % 4) === 3 && (count += v / 255), c), [0,0,0,0]);
-            rgbColors[0] /= count;
-            rgbColors[1] /= count;
-            rgbColors[2] /= count;
-            rgbColors[3] /= data.length / 4;
-            const colors = rgbToHsv(rgbColors);
+    for (let y = 0; y < canvas.height; y++)
+        for (let x = 0; x < canvas.width; x++) {
+            const data = ctx.getImageData(x,y, 1,1).data;
+            const colors = rgbToHsv(data);
             segments.push(colors);
         }
     // if (segments.length > 256) return rootMsg.edit('Your image must not produce any more then 256 emojis.');
@@ -171,6 +164,7 @@ async function startDraw(message, file) {
                         Math.abs(segments[idx].r - pixels[emoji][1].r) +
                         Math.abs(segments[idx].g - pixels[emoji][1].g) +
                         Math.abs(segments[idx].b - pixels[emoji][1].b) +
+                        Math.abs(segments[idx].a - pixels[emoji][1].a) +
                         Math.abs(segments[idx].a - pixels[emoji][1].a)
                 }
             }
@@ -180,6 +174,8 @@ async function startDraw(message, file) {
             await rootMsg.edit('Finding best suited emojis...');
             possible.forEach(list => list.sort((a,b) => a.weight - b.weight));
             rootMsg.delete();
+            canvas.width *= width;
+            canvas.height *= height;
             ctx.clearRect(0,0, canvas.width, canvas.height);
             for (let i = 0; i < possible.length; i++) {
                 const x = (i % tilesWide) * width;
@@ -204,7 +200,16 @@ module.exports = {
     category: 'dumb fun',
     sDesc: 'Converts an image to emojis',
     lDesc: 'Converts any one image into a set of discord emojis',
-    args: [],
+    args: [
+        {
+            type: 'number',
+            name: 'scale',
+            desc: 'The scale to use for the image',
+            min: 0,
+            max: 10,
+            required: false
+        }
+    ],
     /**
      * @param {import('discord.js').Message} message
      */

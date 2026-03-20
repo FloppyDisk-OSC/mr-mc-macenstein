@@ -21,13 +21,6 @@ globalThis.imports = {
     createQuoteMessage,
     Discord: require('discord.js'),
     db: require('./statics/database-manager.js'),
-    locateCategory(name, fields) {
-        for (let field = 0; field < fields.length; field++) {
-            if (fields[field].name == name) {
-                return field
-            }
-        }
-    },
     getAllArgs: require('./statics/arguments-parser'),
     client: new Client({ 
         intents: [

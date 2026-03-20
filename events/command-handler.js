@@ -24,9 +24,9 @@ module.exports = {
                         })
                     }
                     for (const command of commands) {
-                        let category = imports.locateCategory(dbs.commands[command].category, embed.fields)
+                        let category = embed.fields.find(field => field.name === dbs.commands[command].category);
                         if (!category) continue
-                        embed.fields[category].value += '\n`' + command + '` ' + dbs.commands[command].description
+                        category.value += '\n`' + command + '` ' + dbs.commands[command].description
                     }
                 } else if (commands.includes(args)) {
                     const commandData = dbs.commands[args].command

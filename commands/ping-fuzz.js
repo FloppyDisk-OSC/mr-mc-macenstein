@@ -1,6 +1,7 @@
 let lastPing = 0;
 const { AttachmentBuilder } = require('discord.js');
 
+const toWait = 2 * 60 * 1000;
 module.exports = {
     name: 'electricfuzzping',
     category: 'dumb fun',
@@ -21,7 +22,7 @@ module.exports = {
      * @param {import('discord.js').Message} message
      */
     execute: async (message) => {
-        if ((Date.now() - lastPing) < 2 * 60 * 1000) return;
+        if ((Date.now() - lastPing) < toWait) return message.reply(`Cooldown ends <t:${Math.round((Date.now() + (toWait - (Date.now() - lastPing))) / 1000)}:R>`);
         lastPing = Date.now();
 
         const args = message.arguments;

@@ -44,7 +44,7 @@ module.exports = async (message, args, slash) => {
         case 'number':
             const number = Number(argContent)
             if (number === NaN) return `The argument "${name}" has to be a number` 
-            result[name] = Math.min(Math.max(number, arg.min), arg.max)
+            result[name] = Math.min(Math.max(number, arg.min ?? -Infinity), arg.max ?? Infinity)
             break;
         case 'any':
             result[name] = argContent;

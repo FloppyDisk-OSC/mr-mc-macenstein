@@ -33,6 +33,7 @@ module.exports = {
         {
             type: 'any',
             name: 'code',
+            desc: 'The brainfuck code',
             required: true
         }
     ],
