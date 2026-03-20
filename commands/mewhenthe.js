@@ -7,13 +7,13 @@ module.exports = {
     sDesc: 'random color "me when the"',
     lDesc: 'Generates a random color with the text "Me when the"',
     args: [
-        {
-            type: 'string',
-            name: 'text',
-            desc: 'Text to display (separate top/bottom with |)',
-            required: true
-        }
-    ],
+    {
+        type: 'string',
+        name: 'text',
+        desc: 'Text to display (separate top/bottom with |)',
+        required: false // changed from true to false
+    }
+],
 
     /**
      * @param {import('discord.js').Message} message
