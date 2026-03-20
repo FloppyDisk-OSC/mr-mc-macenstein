@@ -41,8 +41,8 @@ async function startDraw(message, file) {
         image = await sharp(image).png().toBuffer();
     const toTransform = await loadImage(image).catch(() => {});
     if (!toTransform) return rootMsg.edit('The image is in an unsupported format (supports png,jpeg,svg,webp,gif,avif,pdf ONLY)');
-    let tilesWide = Math.max(Math.round(toTransform.width / width), 12);
-    let tilesHigh = Math.max(Math.round(toTransform.height / height), 12);
+    let tilesWide = Math.max(Math.round(toTransform.width / width), 24);
+    let tilesHigh = Math.max(Math.round(toTransform.height / height), 24);
     const canvas = createCanvas(tilesWide * width, tilesHigh * height);
     const ctx = canvas.getContext('2d');
     await rootMsg.edit('Extracting image squares...');
@@ -87,7 +87,7 @@ async function startDraw(message, file) {
                 const y = Math.floor(i / tilesWide) * height;
                 ctx.drawImage(images[possible[i][0].emoji], x,y, width, height);
             }
-            fs.writeFileSync('./' + fileId++ + '.png', canvas.toBuffer());
+            // fs.writeFileSync('./' + fileId++ + '.png', canvas.toBuffer());
             message.reply({
                 content: 'Finished;',
                 files: [new AttachmentBuilder(canvas.toBuffer(), { name: 'converted.png' })]
