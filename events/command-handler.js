@@ -37,7 +37,7 @@ module.exports = {
                     for (const arg of commandData.args) {
                         embed.fields.push({
                             name: `${arg.name} (${arg.type})`,
-                            value: arg.desc,
+                            value: arg.desc || '',
                             inline: true
                         });
                     }

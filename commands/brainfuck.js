@@ -60,6 +60,7 @@ module.exports = {
             });
             clearInterval(inter);
         }
+        console.log(instructions);
         const inter = setInterval(() => {
             if (Date.now() - running > 10000) return end();
             let i = 0;
@@ -67,8 +68,8 @@ module.exports = {
                 const operation = instructions[instruction++];
                 if (!operation) return end();
                 switch (operation.op) {
-                case 'back-byte': dataPointer++; break;
-                case 'fore-byte': dataPointer--; if (dataPointer < 0) dataPointer = 0; break;
+                case 'fore-byte': dataPointer++; break;
+                case 'back-byte': dataPointer--; if (dataPointer < 0) dataPointer = 0; break;
                 case 'incr-byte':
                     if (!memory[dataPointer]) memory[dataPointer] = 0;
                     memory[dataPointer]++;
@@ -79,7 +80,7 @@ module.exports = {
                     memory[dataPointer]--;
                     if (memory[dataPointer] < 0) memory[dataPointer] = 255;
                     break;
-                case 'inpt-byte': memory[dataPointer] = inputs[inPointer++]; break;
+                case 'inpt-byte': memory[dataPointer] = inputs.charCodeAt(inPointer++); break;
                 case 'outp-byte': output.push(memory[dataPointer]); break;
                 case 'if': if (!memory[dataPointer]) instruction = operation.target; break;
                 case 'loop': if (memory[dataPointer]) instruction = operation.target; break;
