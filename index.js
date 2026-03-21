@@ -3,7 +3,7 @@ console.log('starting...')
 // require('./statics/uptimer');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { GoogleGenAI } = require("@google/genai");
-const { exec } = require("child_process");
+const { exec, spawn } = require("child_process");
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
@@ -11,8 +11,13 @@ const process = require('process');
 const config = require('./statics/config.json');
 const syncSlash = require('@frostzzone/discord-sync-commands');
 const { createQuoteCard, createQuoteMessage } = require('./statics/quote-generator.js');
+const electron = require('electron');
 
 process.on('uncaughtException', err => console.warn(err));
+const child = spawn(electron, [require.resolve('./electron/index.js')], { stdio: 'inherit', windowsHide: false });
+process.on('SIGINT', () => { child.kill(); process.exit(); });
+process.on('SIGTERM', () => { child.kill(); process.exit(); });
+process.on('SIGUSR2', () => { child.kill(); process.exit(); });
 
 globalThis.imports = {
     exec,
@@ -148,4 +153,5 @@ imports.client.login(process.env.token);
 globalThis.stop = () => {
     imports.client.destroy();
     imports.exec('kill 1');
+    child.kill();
 }
