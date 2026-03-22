@@ -143,6 +143,7 @@ async function startDraw(message, file) {
             const colors = rgbToHsv(data);
             segments.push(colors);
         }
+    if (segments.length > 16000) return rootMsg.edit('Image or image scale is to big.');
     // if (segments.length > 256) return rootMsg.edit('Your image must not produce any more then 256 emojis.');
     await rootMsg.edit('Weighting emojis...');
     let idx = 0;

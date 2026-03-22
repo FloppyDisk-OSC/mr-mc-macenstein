@@ -43,7 +43,9 @@ app.whenReady().then(() => {
     });
     server.get(/^(?<file>\/.*)/, (req, res) => {
         if (!window) return res.send('Not Yet');
-        window.webContents.send('play', req.params.file);
+        const file = req.params.file.replace(/^\/?~/, process.env.HOME);
+        console.log('Loading', file);
+        window.webContents.send('play', file);
         res.send('Goo');
     });
     server.listen(8080);
