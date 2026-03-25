@@ -1,8 +1,8 @@
 const urls = require('../assets/images.json');
-const { loadImage, createCanvas } = require('canvas');
+const { Canvas, loadImage } = require('skia-canvas');
 const sharp = require('sharp');
 const { AttachmentBuilder } = require('discord.js');
-const fs = require('fs');
+const { rgbToHsv, hsvToRgb } = require('../statics/color');
 
 let ready = false;
 let width;
@@ -10,91 +10,6 @@ let height;
 let pixels;
 let emojis;
 let images;
-let fileId = 51;
-function rgbToHsv (rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const x = Math.min(Math.min(r, g), b);
-    const v = Math.max(Math.max(r, g), b);
-
-    // For grays, hue will be arbitrarily reported as zero. Otherwise, calculate
-    let h = 0;
-    let s = 0;
-    if (x !== v) {
-        const f = (r === x) ? g - b : ((g === x) ? b - r : r - g);
-        const i = (r === x) ? 3 : ((g === x) ? 5 : 1);
-        h = ((i - (f / (v - x))) * 60) % 360;
-        s = (v - x) / v;
-    }
-
-    return {
-        h: h,
-        s: s,
-        v: v,
-        r: rgb[0],
-        g: rgb[1],
-        b: rgb[2],
-        a: rgb[3]
-    };
-}
-function hsvToRgb (hsv) {
-    let h = hsv.h % 360;
-    if (h < 0) h += 360;
-    const s = Math.max(0, Math.min(hsv.s, 1));
-    const v = Math.max(0, Math.min(hsv.v, 1));
-
-    const i = Math.floor(h / 60);
-    const f = (h / 60) - i;
-    const p = v * (1 - s);
-    const q = v * (1 - (s * f));
-    const t = v * (1 - (s * (1 - f)));
-
-    let r;
-    let g;
-    let b;
-
-    switch (i) {
-    default:
-    case 0:
-        r = v;
-        g = t;
-        b = p;
-        break;
-    case 1:
-        r = q;
-        g = v;
-        b = p;
-        break;
-    case 2:
-        r = p;
-        g = v;
-        b = t;
-        break;
-    case 3:
-        r = p;
-        g = q;
-        b = v;
-        break;
-    case 4:
-        r = t;
-        g = p;
-        b = v;
-        break;
-    case 5:
-        r = v;
-        g = p;
-        b = q;
-        break;
-    }
-
-    return [
-        Math.floor(r * 255),
-        Math.floor(g * 255),
-        Math.floor(b * 255),
-        hsv.a
-    ];
-}
 (async () => {
     emojis = Object.keys(urls);
     pixels = [];
@@ -102,7 +17,7 @@ function hsvToRgb (hsv) {
     images = await Promise.all(Object.values(urls).map(url => loadImage(url)));
     width = 32;
     height = width;
-    const canvas = createCanvas(1,1);
+    const canvas = new Canvas(1,1);
     const ctx = canvas.getContext('2d');
     console.log('Extracting emoji pixels...');
     for (const idx in images) {
@@ -122,7 +37,7 @@ async function startDraw(message, file) {
     const req = await fetch(message.attachments.at(file).proxyURL);
     let image = Buffer.from(await req.bytes());
     if (['image/webp', 'image/gif', 'image/avif'].includes(req.headers.get('content-type')))
-        image = await sharp(image).png().toBuffer();
+        image = sharp(image);
     const toTransform = await loadImage(image).catch(() => {});
     if (!toTransform) return rootMsg.edit('The image is in an unsupported format (supports png,jpeg,svg,webp,gif,avif,pdf ONLY)');
     let tilesWide = Math.round(toTransform.width / width);
@@ -132,7 +47,7 @@ async function startDraw(message, file) {
     tilesHigh *= scale;
     tilesWide = Math.round(tilesWide);
     tilesHigh = Math.round(tilesHigh);
-    const canvas = createCanvas(tilesWide, tilesHigh);
+    const canvas = new Canvas(tilesWide, tilesHigh);
     const ctx = canvas.getContext('2d');
     await rootMsg.edit('Extracting image squares...');
     ctx.drawImage(toTransform, 0,0, canvas.width, canvas.height);
@@ -183,10 +98,9 @@ async function startDraw(message, file) {
                 const y = Math.floor(i / tilesWide) * height;
                 ctx.drawImage(images[possible[i][0].emoji], x,y, width, height);
             }
-            // fs.writeFileSync('./' + fileId++ + '.png', canvas.toBuffer());
             message.reply({
                 content: 'Finished;',
-                files: [new AttachmentBuilder(canvas.toBuffer(), { name: 'converted.png' })]
+                files: [new AttachmentBuilder(await canvas.toBuffer(), { name: 'converted.png' })]
             });
             return;
         }
@@ -218,7 +132,7 @@ module.exports = {
         if (!ready) return message.reply('Command not ready for use.');
         if (message.args === 'dump') {
             const sqaureSize = Math.ceil(Math.sqrt(pixels.length)); 
-            const canvas = createCanvas(sqaureSize * (width +10), sqaureSize * height);
+            const canvas = new Canvas(sqaureSize * (width +10), sqaureSize * height);
             const ctx = canvas.getContext('2d');
             let i = 0;
             for (let y = 0; y < canvas.height; y += height) {
@@ -232,7 +146,7 @@ module.exports = {
                 }
             }
             message.reply({
-                files: [new AttachmentBuilder(canvas.toBuffer(), { name: 'debug.png' })]
+                files: [new AttachmentBuilder(await canvas.toBuffer(), { name: 'debug.png' })]
             });
             return;
         }

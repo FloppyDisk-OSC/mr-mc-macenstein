@@ -1,5 +1,5 @@
 const { AttachmentBuilder } = require('discord.js');
-const Canvas = require('canvas');
+const { Canvas } = require('skia-canvas');
 
 module.exports = {
     name: 'mewhenthe',
@@ -36,7 +36,7 @@ module.exports = {
             chosenColor = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}`;
         }
 
-        const canvas = Canvas.createCanvas(600, 600);
+        const canvas = new Canvas(600, 600);
         const ctx = canvas.getContext('2d');
 
         // background
@@ -56,7 +56,7 @@ module.exports = {
         ctx.textBaseline = 'bottom';
         ctx.fillText(bottomText, canvas.width / 2, canvas.height - 20);
 
-        const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'mewhenthe.png' });
+        const attachment = new AttachmentBuilder(await canvas.toBuffer(), { name: 'mewhenthe.png' });
 
         await message.channel.send({
             content: `me when the ${chosenColor}`,

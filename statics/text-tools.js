@@ -1,6 +1,6 @@
 let Canvas;
 try {
-    Canvas = require('canvas');
+    Canvas = require('skia-canvas');
 } catch (err) {
     console.warn(err);
     Canvas = { CanvasRenderingContext2D: { prototype: {} } }

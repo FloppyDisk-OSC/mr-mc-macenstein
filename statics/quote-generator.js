@@ -1,4 +1,4 @@
-const { createCanvas, loadImage, parseText, drawStyled } = require('./text-tools');
+const { Canvas, loadImage, parseText, drawStyled } = require('./text-tools');
 const emojiRegex = require('emoji-regex'); // im not dealing with that damn regex being inside here
 
 globalThis.nostd = true;
@@ -35,7 +35,7 @@ function findBitEdge(num) {
  */
 async function createQuoteCard(message) {
     /** @type {import('canvas').Canvas} */
-    const canvas = createCanvas(640 * imageScale, 360 * imageScale);
+    const canvas = new Canvas(640 * imageScale, 360 * imageScale);
     /** @type {import('canvas').CanvasRenderingContext2D} */
     const ctx = canvas.getContext('2d');
     ctx.textAlign = 'center';
@@ -72,7 +72,7 @@ async function createQuoteCard(message) {
     ctx.fillRect(360,namePlateY - (textHeight / 2), 280,360 - (namePlateY - (textHeight / 2)));
     ctx.fillStyle = '#EEE';
     ctx.fillText(message.author.username, 500, namePlateY, 280);
-    return new Blob([canvas.toBuffer()], { type: 'image/png' });
+    return new Blob([await canvas.toBuffer()], { type: 'image/png' });
 }
 /**
  * @param {import('discord.js').Message[]} messages 
@@ -80,7 +80,7 @@ async function createQuoteCard(message) {
  */
 async function createQuoteMessage(messages) {
     /** @type {import('canvas').Canvas} */
-    const canvas = createCanvas(4950 * imageScale, 360 * imageScale * messages.length);
+    const canvas = new Canvas(4950 * imageScale, 360 * imageScale * messages.length);
     /** @type {import('canvas').CanvasRenderingContext2D} */
     const ctx = canvas.getContext('2d');
     ctx.scale(imageScale, imageScale);
@@ -115,7 +115,7 @@ async function createQuoteMessage(messages) {
         ctx.fillText(message.content, 460, 180);
         ctx.translate(0, 360);
     }
-    return new Blob([canvas.toBuffer()], { type: 'image/png' });
+    return new Blob([await canvas.toBuffer()], { type: 'image/png' });
 }
 
 module.exports = { createQuoteCard, createQuoteMessage }

@@ -1,6 +1,6 @@
 const emojis = require('./emojis.json');
-const { loadImage, createCanvas } = require('canvas');
-const canvas = createCanvas(32, 32);
+const { Canvas, loadImage } = require('skia-canvas');
+const canvas = new Canvas(32, 32);
 const ctx = canvas.getContext('2d');
 const fs = require('fs');
 ctx.textDrawingMode = "glyph";
