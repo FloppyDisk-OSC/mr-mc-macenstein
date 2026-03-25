@@ -17,7 +17,12 @@ module.exports = {
     ],
     execute(message) {
         const args = message.arguments;
-        const subject = args['subject'] ?? 'you';
+        const subject = args['subject'];
+
+        // subject test
+        if (!subject || subject.trim() === '') {
+            return message.reply("You need to provide a subject! (Example: mc;predict John)");
+        }
 
         // choose a date up to 30 days in the future
         const now = new Date();
